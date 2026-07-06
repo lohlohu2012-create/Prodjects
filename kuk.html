@@ -1,0 +1,1731 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Сменное задание — Наряд</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js">
+    </script>
+    <style>
+        /* ----- все стили без изменений (они остаются) ----- */
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background: #f0f0f0;
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #shiftManager {
+            background: #fff;
+            padding: 12px 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        #shiftManager label {
+            font-weight: 600;
+            margin-right: 5px;
+        }
+        #shiftManager select {
+            padding: 6px 12px;
+            font-size: 16px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            min-width: 180px;
+        }
+        #shiftManager button {
+            padding: 6px 18px;
+            font-size: 15px;
+            background: #2c3e50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        #shiftManager button:hover {
+            background: #1a252f;
+        }
+        #shiftManager button.danger {
+            background: #b03a2e;
+        }
+        #shiftManager button.danger:hover {
+            background: #8e2a1f;
+        }
+        #shiftManager button.success {
+            background: #27ae60;
+        }
+        #shiftManager button.success:hover {
+            background: #1e8449;
+        }
+        #shiftManager button.primary {
+            background: #2980b9;
+        }
+        #shiftManager button.primary:hover {
+            background: #1a6a8a;
+        }
+        #shiftManager button.purple {
+            background: #8e44ad;
+        }
+        #shiftManager button.purple:hover {
+            background: #6c3483;
+        }
+
+        #shift-order {
+            background: #fff;
+            padding: 30px 35px 25px 35px;
+            max-width: 1100px;
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            margin-bottom: 30px;
+            font-size: 15px;
+            line-height: 1.5;
+            color: #000;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .header .row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+            font-size: 17px;
+        }
+        .header .row input[type="text"] {
+            font-family: inherit;
+            font-size: 17px;
+            border: none;
+            border-bottom: 1px solid #333;
+            background: transparent;
+            text-align: center;
+            padding: 2px 4px;
+            width: auto;
+            min-width: 40px;
+        }
+        .header .row input[type="text"]:focus {
+            outline: none;
+            border-bottom-color: #2c3e50;
+        }
+        .header .row .obj-input {
+            min-width: 200px;
+            width: 60%;
+        }
+        .header .row .order-input {
+            min-width: 120px;
+            width: 30%;
+        }
+        .header .row .task-textarea {
+            width: 100%;
+            min-height: 70px;
+            font-family: inherit;
+            font-size: 17px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background: transparent;
+            padding: 6px 10px;
+            resize: vertical;
+            text-align: left;
+            line-height: 1.4;
+        }
+        .header .row .task-textarea:focus {
+            outline: 1px solid #2c3e50;
+            background: #fafafa;
+        }
+        .header .row.label-task {
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .header .row.label-task span {
+            padding-top: 4px;
+        }
+
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 18px 0 10px 0;
+            font-size: 15px;
+        }
+        .details-table th,
+        .details-table td {
+            border: 1px solid #000;
+            padding: 6px 8px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .details-table th {
+            background: #f2f2f2;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+        .details-table td input[type="text"] {
+            font-family: inherit;
+            font-size: 15px;
+            border: none;
+            background: transparent;
+            width: 100%;
+            padding: 4px 2px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .details-table td input[type="text"]:focus {
+            outline: 1px solid #2c3e50;
+            background: #fafafa;
+        }
+        .details-table td .del-btn {
+            background: transparent;
+            border: none;
+            color: #c0392b;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 4px;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .details-table td .del-btn:hover {
+            color: #e74c3c;
+        }
+        .details-table tfoot td {
+            font-weight: 700;
+            background: #f9f9f9;
+        }
+        .details-table .col-num {
+            width: 50px;
+        }
+        .details-table .col-exec {
+            min-width: 120px;
+        }
+        .details-table .col-people {
+            min-width: 80px;
+        }
+        .details-table .col-time {
+            min-width: 80px;
+        }
+        .details-table .col-done {
+            min-width: 80px;
+        }
+        .details-table .col-note {
+            min-width: 150px;
+        }
+        .details-table .col-action {
+            width: 40px;
+        }
+
+        .signatures {
+            margin: 20px 0 18px 0;
+            font-size: 16px;
+        }
+        .signatures .sign-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+        }
+        .signatures .sign-row input[type="text"] {
+            font-family: inherit;
+            font-size: 16px;
+            border: none;
+            border-bottom: 1px solid #333;
+            background: transparent;
+            padding: 2px 6px;
+            min-width: 100px;
+            flex: 0 1 auto;
+        }
+        .signatures .sign-row input[type="text"]:focus {
+            outline: none;
+            border-bottom-color: #2c3e50;
+        }
+        .signatures .sign-row .small-input {
+            min-width: 40px;
+            width: 50px;
+        }
+        .signatures .sign-row .mid-input {
+            min-width: 120px;
+        }
+
+        .add-row-inline {
+            margin: 6px 0 0 0;
+            text-align: left;
+        }
+        .add-row-inline button {
+            padding: 4px 16px;
+            font-size: 14px;
+            font-family: inherit;
+            background: #ecf0f1;
+            border: 1px solid #999;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .add-row-inline button:hover {
+            background: #d5dbdb;
+        }
+
+        .shift-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .shift-actions button {
+            padding: 6px 20px;
+            font-size: 16px;
+            background: #2c3e50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .shift-actions button:hover {
+            background: #1a252f;
+        }
+
+        /* Модальное окно */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 25px 30px;
+            border-radius: 8px;
+            max-width: 98%;
+            width: 1400px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+        .modal-content h2 {
+            text-align: center;
+            margin-top: 0;
+        }
+        .modal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin: 15px 0;
+        }
+        .modal-content th,
+        .modal-content td {
+            border: 1px solid #999;
+            padding: 4px 5px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .modal-content th {
+            background: #eaeaea;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+        .modal-content td input[type="text"] {
+            width: 100%;
+            border: none;
+            background: transparent;
+            padding: 3px 2px;
+            font-family: inherit;
+            font-size: 13px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .modal-content td input[type="text"]:focus {
+            outline: 1px solid #2c3e50;
+            background: #fafafa;
+        }
+        .modal-content .del-row-btn {
+            background: transparent;
+            border: none;
+            color: #c0392b;
+            font-size: 18px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .modal-actions button {
+            padding: 8px 30px;
+            font-size: 16px;
+            background: #2c3e50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .modal-actions button:hover {
+            background: #1a252f;
+        }
+        .modal-actions button.success {
+            background: #27ae60;
+        }
+        .modal-actions button.success:hover {
+            background: #1e8449;
+        }
+        .modal-actions button.danger {
+            background: #b03a2e;
+        }
+        .modal-actions button.danger:hover {
+            background: #8e2a1f;
+        }
+
+        #pasteArea {
+            display: none;
+            margin: 12px 0;
+            border: 1px dashed #999;
+            padding: 12px;
+            border-radius: 4px;
+            background: #fafafa;
+        }
+        #pasteArea textarea {
+            width: 100%;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+            min-height: 120px;
+        }
+        #pasteArea .paste-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        #pasteArea .paste-buttons button {
+            padding: 6px 20px;
+            font-size: 15px;
+            background: #2c3e50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #pasteArea .paste-buttons button:hover {
+            background: #1a252f;
+        }
+        #pasteArea .paste-buttons button.cancel {
+            background: #b03a2e;
+        }
+        #pasteArea .paste-buttons button.cancel:hover {
+            background: #8e2a1f;
+        }
+
+        /* Печать / PDF */
+        @media print {
+            body {
+                background: #fff;
+                margin: 0;
+                padding: 0;
+            }
+            #shiftManager {
+                display: none !important;
+            }
+            #shift-order {
+                box-shadow: none;
+                border-radius: 0;
+                padding: 10px 15px !important;
+                max-width: 100%;
+                margin: 0;
+                font-size: 12px !important;
+            }
+            .header h1 {
+                font-size: 20px !important;
+                margin-bottom: 4px !important;
+            }
+            .header .row {
+                font-size: 14px !important;
+            }
+            .header .row input[type="text"],
+            .header .row .task-textarea {
+                font-size: 14px !important;
+                padding: 0px 2px !important;
+            }
+            .details-table {
+                font-size: 12px !important;
+                margin: 8px 0 !important;
+            }
+            .details-table th,
+            .details-table td {
+                padding: 4px 4px !important;
+            }
+            .details-table td input {
+                font-size: 12px !important;
+                padding: 2px 1px !important;
+            }
+            .details-table .col-exec {
+                min-width: 80px !important;
+            }
+            .details-table .col-people {
+                min-width: 60px !important;
+            }
+            .details-table .col-time {
+                min-width: 60px !important;
+            }
+            .details-table .col-done {
+                min-width: 60px !important;
+            }
+            .details-table .col-note {
+                min-width: 80px !important;
+            }
+            .details-table .col-action {
+                display: none !important;
+            }
+            .details-table td .del-btn {
+                display: none !important;
+            }
+            .add-row-inline {
+                display: none !important;
+            }
+            .shift-actions {
+                display: none !important;
+            }
+            .signatures {
+                font-size: 14px !important;
+                margin: 12px 0 !important;
+            }
+            .signatures .sign-row input {
+                font-size: 14px !important;
+                padding: 0 4px !important;
+                min-width: 60px !important;
+            }
+            .modal-overlay {
+                display: none !important;
+            }
+        }
+
+        .pdf-printing #shift-order {
+            padding: 8px 12px !important;
+            font-size: 11px !important;
+        }
+        .pdf-printing .header h1 {
+            font-size: 18px !important;
+            margin-bottom: 2px !important;
+        }
+        .pdf-printing .header .row {
+            font-size: 12px !important;
+        }
+        .pdf-printing .header .row .task-textarea {
+            font-size: 12px !important;
+            min-height: 40px !important;
+        }
+        .pdf-printing .details-table {
+            font-size: 11px !important;
+            margin: 4px 0 !important;
+        }
+        .pdf-printing .details-table th,
+        .pdf-printing .details-table td {
+            padding: 2px 3px !important;
+        }
+        .pdf-printing .details-table td input {
+            font-size: 11px !important;
+            padding: 1px 1px !important;
+        }
+        .pdf-printing .signatures {
+            font-size: 12px !important;
+            margin: 8px 0 !important;
+        }
+        .pdf-printing .signatures .sign-row input {
+            font-size: 12px !important;
+            padding: 0 2px !important;
+            min-width: 50px !important;
+        }
+        .pdf-printing .details-table .col-action {
+            display: none !important;
+        }
+        .pdf-printing .details-table td .del-btn {
+            display: none !important;
+        }
+        .pdf-printing .add-row-inline {
+            display: none !important;
+        }
+        .pdf-printing .shift-actions {
+            display: none !important;
+        }
+
+        @media (max-width: 700px) {
+            #shift-order {
+                padding: 15px;
+            }
+            .details-table th,
+            .details-table td {
+                padding: 4px 4px;
+                font-size: 13px;
+            }
+            .details-table td input {
+                font-size: 13px;
+            }
+            .header h1 {
+                font-size: 20px;
+            }
+            .header .row {
+                font-size: 15px;
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .header .row input[type="text"],
+            .header .row .task-textarea {
+                width: 100% !important;
+                min-width: unset;
+            }
+            .signatures .sign-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .signatures .sign-row input {
+                width: 100%;
+            }
+            #shiftManager {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .modal-content {
+                padding: 15px;
+            }
+            .modal-content table {
+                font-size: 11px;
+            }
+            .modal-content th,
+            .modal-content td {
+                padding: 2px 3px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== Панель управления ===== -->
+    <div id="shiftManager">
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <label for="shiftSelect">Наряд:</label>
+            <select id="shiftSelect"></select>
+            <button onclick="addNewShift()">➕ Новый (ручн.)</button>
+            <button class="danger" onclick="deleteCurrentShift()">✖ Удалить</button>
+            <button onclick="openModal()" class="primary">📋 Сводная таблица</button>
+        </div>
+        <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap; margin-left:auto;">
+            <button onclick="downloadPDF()">⬇ Скачать PDF</button>
+            <!-- ОБНОВЛЁННАЯ КНОПКА для скачивания всех PDF по одному -->
+            <button onclick="downloadAllPDFSeparate()" class="purple">📄 Скачать все PDF по одному</button>
+            <button onclick="downloadExcelFormatted()" style="background:#27ae60;">📊 Скачать Excel (A4)</button>
+            <button onclick="downloadAllShiftsExcel()" style="background:#8e44ad;">📚 Скачать все сменки</button>
+            <button onclick="window.print()">🖨 Печать</button>
+        </div>
+    </div>
+
+    <!-- ===== НАРЯД ===== -->
+    <div id="shift-order">
+        <!-- шапка -->
+        <div class="header">
+            <h1>СМЕННОЕ ЗАДАНИЕ</h1>
+            <div class="row">
+                <span>«</span>
+                <input type="text" id="day" value="16" size="3" />
+                <span>»</span>
+                <input type="text" id="month" value="06" size="3" />
+                <input type="text" id="year" value="2026" size="5" />
+                <span>г.</span>
+            </div>
+            <div class="row">
+                <span>ОБЪЕКТ:</span>
+                <input type="text" id="object" class="obj-input" value="КЕМЕРОВО" />
+            </div>
+            <div class="row">
+                <span>Заказ №</span>
+                <input type="text" id="orderNum" class="order-input" value="270НЗ-26" />
+            </div>
+            <div class="row label-task">
+                <span>Задание:</span>
+                <textarea id="task" class="task-textarea" rows="2">Распил соты на штрабике в размер</textarea>
+            </div>
+        </div>
+
+        <!-- таблица деталей -->
+        <table class="details-table" id="detailsTable">
+            <thead>
+                <tr>
+                    <th class="col-num">№ п/п</th>
+                    <th class="col-exec">Исполнитель</th>
+                    <th class="col-people">Кол-во людей</th>
+                    <th class="col-time">Время (час)</th>
+                    <th class="col-done">Выполнено</th>
+                    <th class="col-note">Примечание</th>
+                    <th class="col-action"></th>
+                </tr>
+            </thead>
+            <tbody id="detailsBody"></tbody>
+            <tfoot>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td><strong>Итого людей:</strong> <span id="totalPeople">0</span></td>
+                    <td><strong>Итого часов:</strong> <span id="totalTime">0</span></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="add-row-inline">
+            <button onclick="addRow()">➕ Добавить строку</button>
+        </div>
+
+        <!-- подписи -->
+        <div class="signatures">
+            <div class="sign-row">
+                <span>Получил: <input type="text" class="mid-input" id="recipientInput" value="Галкин" /> /__________________/</span>
+            </div>
+            <div class="sign-row">
+                <span>Начальник производства   <input type="text" class="mid-input" value="" placeholder="______________________" /></span>
+            </div>
+            <div class="sign-row">
+                <span>Плановый отдел   <input type="text" class="mid-input" id="planDeptInput" value="БАХАРЕВА Е.А." placeholder="_________________" /></span>
+            </div>
+            <div class="sign-row">
+                <span>Сменный мастер  <input type="text" class="mid-input" value="" placeholder="_______________________" /></span>
+            </div>
+            <div class="sign-row">
+                <span>Дата выполнения задания "<input type="text" class="small-input" id="execDateDay" value="" placeholder="___" size="3" />" <input type="text" class="mid-input" id="execDateMonth" value="" placeholder="______________" size="12" />2026г</span>
+            </div>
+            <div class="sign-row">
+                <span>Дата получения ПТО задания "<input type="text" class="small-input" id="ptoDateDay" value="" placeholder="___" size="3" />" <input type="text" class="mid-input" id="ptoDateMonth" value="" placeholder="______________" size="12" />2026г</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== МОДАЛЬНОЕ ОКНО (СВОДНАЯ ТАБЛИЦА) ===== -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <h2>Сводная таблица данных</h2>
+            <p style="text-align:center; font-size:14px; color:#555;">Введите данные по каждому заданию. При нажатии «Сформировать наряды» они будут сгруппированы по заказу.</p>
+
+            <div id="pasteArea">
+                <p style="margin:0 0 6px 0; font-weight:600;">Вставьте данные из Excel (табуляция между колонками):</p>
+                <textarea id="pasteText" placeholder="Вставьте скопированные строки..."></textarea>
+                <div class="paste-buttons">
+                    <button onclick="processPaste()">✅ Вставить строки</button>
+                    <button class="cancel" onclick="document.getElementById('pasteArea').style.display='none'">Отмена</button>
+                </div>
+            </div>
+
+            <table id="sourceTable">
+                <thead>
+                    <tr>
+                        <th>Заказ</th>
+                        <th>Объект</th>
+                        <th>День</th>
+                        <th>Месяц</th>
+                        <th>Год</th>
+                        <th>Плановый отдел</th>
+                        <th>Задание</th>
+                        <th>Исполнитель</th>
+                        <th>Люди</th>
+                        <th>Время</th>
+                        <th>Выполнено</th>
+                        <th>Примечание</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="sourceBody"></tbody>
+            </table>
+            <div style="text-align:left; margin:6px 0; display:flex; gap:10px; flex-wrap:wrap;">
+                <button onclick="addSourceRow()">➕ Добавить строку</button>
+                <button onclick="document.getElementById('pasteArea').style.display='block'" style="background:#2980b9;color:#fff;border:none;border-radius:4px;padding:4px 16px;cursor:pointer;">📋 Вставить из Excel</button>
+            </div>
+            <div class="modal-actions">
+                <button class="success" onclick="generateShiftsFromSource()">⚙ Сформировать наряды</button>
+                <button onclick="closeModal()">Закрыть</button>
+                <button class="danger" onclick="clearSourceTable()">🗑 Очистить таблицу</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ---- Хранилище всех нарядов ----
+            let shifts = [];
+            let currentIndex = 0;
+
+            // ---- DOM ссылки ----
+            const shiftSelect = document.getElementById('shiftSelect');
+            const tbody = document.getElementById('detailsBody');
+            const totalPeopleSpan = document.getElementById('totalPeople');
+            const totalTimeSpan = document.getElementById('totalTime');
+
+            const dayInput = document.getElementById('day');
+            const monthInput = document.getElementById('month');
+            const yearInput = document.getElementById('year');
+            const objectInput = document.getElementById('object');
+            const orderInput = document.getElementById('orderNum');
+            const taskTextarea = document.getElementById('task');
+
+            const recipientInput = document.getElementById('recipientInput');
+            const planDeptInput = document.getElementById('planDeptInput');
+            const execDateDay = document.getElementById('execDateDay');
+            const execDateMonth = document.getElementById('execDateMonth');
+            const ptoDateDay = document.getElementById('ptoDateDay');
+            const ptoDateMonth = document.getElementById('ptoDateMonth');
+
+            // ---- Вспомогательные ----
+            function parseNumber(str) {
+                if (!str) return 0;
+                const m = String(str).match(/\d+(?:[.,]\d+)?/);
+                if (m) return parseFloat(m[0].replace(',', '.')) || 0;
+                return 0;
+            }
+
+            function updateTotals() {
+                const rows = tbody.querySelectorAll('tr');
+                let totalPeople = 0,
+                    totalTime = 0;
+                rows.forEach(row => {
+                    const p = row.querySelector('.people-input');
+                    const t = row.querySelector('.time-input');
+                    if (p) totalPeople += parseNumber(p.value);
+                    if (t) totalTime += parseNumber(t.value);
+                });
+                totalPeopleSpan.textContent = totalPeople;
+                totalTimeSpan.textContent = totalTime;
+            }
+
+            // ---- Создание строки деталей ----
+            function createRow(data) {
+                const row = document.createElement('tr');
+                const num = tbody.children.length + 1;
+                const execVal = data && data.exec !== undefined ? data.exec : '';
+                const peopleVal = data && data.people !== undefined ? data.people : '';
+                const timeVal = data && data.time !== undefined ? data.time : '';
+                const doneVal = data && data.done !== undefined ? data.done : '';
+                const noteVal = data && data.note !== undefined ? data.note : '';
+
+                row.innerHTML = `
+                    <td class="col-num">${num}</td>
+                    <td class="col-exec"><input type="text" class="exec-input" value="${execVal}" placeholder="ФИО" /></td>
+                    <td class="col-people"><input type="text" class="people-input" value="${peopleVal}" placeholder="Кол-во" /></td>
+                    <td class="col-time"><input type="text" class="time-input" value="${timeVal}" placeholder="Часы" /></td>
+                    <td class="col-done"><input type="text" class="done-input" value="${doneVal}" placeholder="Кол-во" /></td>
+                    <td class="col-note"><input type="text" class="note-input" value="${noteVal}" placeholder="Примечание" /></td>
+                    <td class="col-action"><button class="del-btn" title="Удалить">×</button></td>
+                `;
+
+                const delBtn = row.querySelector('.del-btn');
+                delBtn.addEventListener('click', function() {
+                    if (tbody.children.length <= 1) { alert('Нельзя удалить последнюю строку.'); return; }
+                    row.remove();
+                    renumberRows();
+                    updateTotals();
+                    saveCurrentShift();
+                });
+
+                const inputs = row.querySelectorAll('input');
+                inputs.forEach(inp => {
+                    inp.addEventListener('change', saveCurrentShift);
+                    inp.addEventListener('input', function() {
+                        if (inp.classList.contains('people-input') || inp.classList.contains('time-input')) {
+                            updateTotals();
+                        }
+                        saveCurrentShift();
+                    });
+                });
+                return row;
+            }
+
+            function addRow(data) {
+                const row = createRow(data || {});
+                tbody.appendChild(row);
+                renumberRows();
+                updateTotals();
+                saveCurrentShift();
+                return row;
+            }
+
+            function renumberRows() {
+                const rows = tbody.querySelectorAll('tr');
+                rows.forEach((row, idx) => { const td = row.querySelector('.col-num'); if (td) td.textContent = idx + 1; });
+            }
+
+            // ---- Сохранение текущего наряда ----
+            function saveCurrentShift() {
+                if (shifts.length === 0) return;
+                const shift = shifts[currentIndex];
+                shift.day = dayInput.value;
+                shift.month = monthInput.value;
+                shift.year = yearInput.value;
+                shift.object = objectInput.value;
+                shift.orderNum = orderInput.value;
+                shift.task = taskTextarea.value;
+
+                const rows = tbody.querySelectorAll('tr');
+                shift.details = [];
+                rows.forEach(row => {
+                    shift.details.push({
+                        exec: row.querySelector('.exec-input')?.value || '',
+                        people: row.querySelector('.people-input')?.value || '',
+                        time: row.querySelector('.time-input')?.value || '',
+                        done: row.querySelector('.done-input')?.value || '',
+                        note: row.querySelector('.note-input')?.value || ''
+                    });
+                });
+
+                shift.signatures = {
+                    recipient: document.getElementById('recipientInput').value || '',
+                    chief: document.querySelector('.signatures .sign-row:nth-child(2) input')?.value || '',
+                    planDept: document.getElementById('planDeptInput').value || '',
+                    master: document.querySelector('.signatures .sign-row:nth-child(4) .mid-input')?.value || '',
+                    execDateDay: document.getElementById('execDateDay').value || '',
+                    execDateMonth: document.getElementById('execDateMonth').value || '',
+                    ptoDateDay: document.getElementById('ptoDateDay').value || '',
+                    ptoDateMonth: document.getElementById('ptoDateMonth').value || ''
+                };
+            }
+
+            // ---- Загрузка наряда ----
+            function loadShift(index) {
+                if (index < 0 || index >= shifts.length) return;
+                currentIndex = index;
+                const shift = shifts[index];
+
+                dayInput.value = shift.day || '16';
+                monthInput.value = shift.month || '06';
+                yearInput.value = shift.year || '2026';
+                objectInput.value = shift.object || '';
+                orderInput.value = shift.orderNum || '';
+                taskTextarea.value = shift.task || '';
+
+                tbody.innerHTML = '';
+                if (shift.details && shift.details.length > 0) {
+                    shift.details.forEach(d => {
+                        const row = createRow(d);
+                        tbody.appendChild(row);
+                    });
+                } else {
+                    addRow({});
+                }
+                renumberRows();
+                updateTotals();
+
+                if (shift.signatures) {
+                    const s = shift.signatures;
+                    document.getElementById('recipientInput').value = s.recipient || '';
+                    document.querySelector('.signatures .sign-row:nth-child(2) input').value = s.chief || '';
+                    document.getElementById('planDeptInput').value = s.planDept || '';
+                    document.querySelector('.signatures .sign-row:nth-child(4) .mid-input').value = s.master || '';
+                    document.getElementById('execDateDay').value = s.execDateDay || '';
+                    document.getElementById('execDateMonth').value = s.execDateMonth || '';
+                    document.getElementById('ptoDateDay').value = s.ptoDateDay || '';
+                    document.getElementById('ptoDateMonth').value = s.ptoDateMonth || '';
+                }
+
+                shiftSelect.value = index;
+                syncDatesFromHeader();
+            }
+
+            // ---- Синхронизация дат (шапка → подписи) ----
+            function syncDatesFromHeader() {
+                const day = dayInput.value;
+                const month = monthInput.value;
+                document.getElementById('execDateDay').value = day;
+                document.getElementById('execDateMonth').value = month;
+                document.getElementById('ptoDateDay').value = day;
+                document.getElementById('ptoDateMonth').value = month;
+                saveCurrentShift();
+            }
+
+            [dayInput, monthInput].forEach(inp => {
+                inp.addEventListener('change', function() { syncDatesFromHeader(); });
+                inp.addEventListener('input', function() { syncDatesFromHeader(); });
+            });
+
+            // ---- Добавление нового наряда (ручное) ----
+            function addNewShift() {
+                saveCurrentShift();
+                const newShift = createEmptyShift();
+                shifts.push(newShift);
+                populateSelect();
+                loadShift(shifts.length - 1);
+            }
+
+            function createEmptyShift() {
+                return {
+                    day: '',
+                    month: '',
+                    year: '',
+                    object: '',
+                    orderNum: '',
+                    task: '',
+                    details: [{ exec: '', people: '', time: '', done: '', note: '' }],
+                    signatures: {
+                        recipient: '',
+                        chief: '',
+                        planDept: '',
+                        master: '',
+                        execDateDay: '',
+                        execDateMonth: '',
+                        ptoDateDay: '',
+                        ptoDateMonth: ''
+                    }
+                };
+            }
+
+            function deleteCurrentShift() {
+                if (shifts.length <= 1) { alert('Нельзя удалить единственный наряд.'); return; }
+                if (!confirm('Удалить текущий наряд?')) return;
+                shifts.splice(currentIndex, 1);
+                populateSelect();
+                if (currentIndex >= shifts.length) currentIndex = shifts.length - 1;
+                loadShift(currentIndex);
+            }
+
+            function populateSelect() {
+                shiftSelect.innerHTML = '';
+                shifts.forEach((s, idx) => {
+                    const opt = document.createElement('option');
+                    opt.value = idx;
+                    opt.textContent = s.orderNum || `Наряд №${idx+1}`;
+                    shiftSelect.appendChild(opt);
+                });
+                shiftSelect.value = currentIndex;
+            }
+
+            shiftSelect.addEventListener('change', function() {
+                const idx = parseInt(this.value);
+                if (!isNaN(idx) && idx >= 0 && idx < shifts.length) {
+                    saveCurrentShift();
+                    loadShift(idx);
+                }
+            });
+
+            // ---- Инициализация с одним пустым нарядом ----
+            function initDefaultShift() {
+                const defaultRows = [
+                    { exec: 'Галкин', people: '2', time: '8', done: '', note: 'КЕМЕРОВО' },
+                ];
+                const shift = {
+                    day: '16',
+                    month: '06',
+                    year: '2026',
+                    object: 'КЕМЕРОВО',
+                    orderNum: '270НЗ-26',
+                    task: 'Распил соты на штрабике в размер',
+                    details: defaultRows,
+                    signatures: {
+                        recipient: 'Галкин',
+                        chief: '',
+                        planDept: 'БАХАРЕВА Е.А.',
+                        master: '',
+                        execDateDay: '16',
+                        execDateMonth: '06',
+                        ptoDateDay: '16',
+                        ptoDateMonth: '06'
+                    }
+                };
+                shifts.push(shift);
+                populateSelect();
+                loadShift(0);
+            }
+
+            // ---- Модальное окно (сводная таблица) ----
+            const modalOverlay = document.getElementById('modalOverlay');
+            const sourceBody = document.getElementById('sourceBody');
+
+            function openModal() {
+                modalOverlay.classList.add('active');
+                if (sourceBody.children.length === 0) {
+                    addSourceRow();
+                    addSourceRow();
+                }
+            }
+
+            function closeModal() {
+                modalOverlay.classList.remove('active');
+            }
+
+            function addSourceRow(data) {
+                const row = document.createElement('tr');
+                // Порядок полей: order, object, day, month, year, planDept, task, exec, people, time, done, note
+                const fields = ['order', 'object', 'day', 'month', 'year', 'planDept', 'task', 'exec', 'people', 'time', 'done', 'note'];
+                let html = '';
+                fields.forEach(f => {
+                    const val = data && data[f] !== undefined ? data[f] : '';
+                    html += `<td><input type="text" class="src-${f}" value="${val}" placeholder="${f}" /></td>`;
+                });
+                html += `<td><button class="del-row-btn" title="Удалить">×</button></td>`;
+                row.innerHTML = html;
+                sourceBody.appendChild(row);
+
+                const delBtn = row.querySelector('.del-row-btn');
+                delBtn.addEventListener('click', function() {
+                    if (sourceBody.children.length <= 1) { alert('Нельзя удалить последнюю строку.'); return; }
+                    row.remove();
+                });
+                return row;
+            }
+
+            function clearSourceTable() {
+                if (!confirm('Очистить все данные сводной таблицы?')) return;
+                sourceBody.innerHTML = '';
+                addSourceRow();
+            }
+
+            // ---- Вставка из Excel ----
+            function processPaste() {
+                const text = document.getElementById('pasteText').value;
+                if (!text.trim()) { alert('Нет данных для вставки.'); return; }
+
+                const lines = text.split('\n').filter(line => line.trim() !== '');
+                let added = 0;
+                lines.forEach(line => {
+                    let parts = line.split('\t');
+                    if (parts.length < 2) {
+                        if (line.includes(',')) parts = line.split(',');
+                        else if (line.includes(';')) parts = line.split(';');
+                    }
+                    parts = parts.map(p => p.trim());
+                    while (parts.length < 12) parts.push('');
+                    const data = {
+                        order: parts[0] || '',
+                        object: parts[1] || '',
+                        day: parts[2] || '',
+                        month: parts[3] || '',
+                        year: parts[4] || '',
+                        planDept: parts[5] || '',
+                        task: parts[6] || '',
+                        exec: parts[7] || '',
+                        people: parts[8] || '',
+                        time: parts[9] || '',
+                        done: parts[10] || '',
+                        note: parts[11] || ''
+                    };
+                    addSourceRow(data);
+                    added++;
+                });
+                document.getElementById('pasteText').value = '';
+                document.getElementById('pasteArea').style.display = 'none';
+                alert(`Добавлено ${added} строк(и).`);
+            }
+
+            // ---- Генерация нарядов из сводной таблицы ----
+            function generateShiftsFromSource() {
+                const rows = sourceBody.querySelectorAll('tr');
+                if (rows.length === 0) { alert('Нет данных для генерации.'); return; }
+
+                const data = [];
+                rows.forEach(row => {
+                    const get = (cls) => row.querySelector(`.src-${cls}`)?.value || '';
+                    data.push({
+                        order: get('order'),
+                        object: get('object'),
+                        day: get('day'),
+                        month: get('month'),
+                        year: get('year'),
+                        planDept: get('planDept'),
+                        task: get('task'),
+                        exec: get('exec'),
+                        people: get('people'),
+                        time: get('time'),
+                        done: get('done'),
+                        note: get('note')
+                    });
+                });
+
+                const groups = {};
+                data.forEach(item => {
+                    const key = item.order.trim() || 'Без заказа';
+                    if (!groups[key]) {
+                        groups[key] = {
+                            order: key,
+                            object: item.object,
+                            day: item.day,
+                            month: item.month,
+                            year: item.year,
+                            planDept: item.planDept,
+                            task: item.task,
+                            details: []
+                        };
+                    }
+                    groups[key].details.push({
+                        exec: item.exec,
+                        people: item.people,
+                        time: item.time,
+                        done: item.done,
+                        note: item.note
+                    });
+                });
+
+                let hasDetails = false;
+                for (let key in groups) {
+                    if (groups[key].details.length > 0) { hasDetails = true; break; }
+                }
+                if (!hasDetails) { alert('Нет заполненных строк с деталями.'); return; }
+
+                const newShifts = [];
+                for (let key in groups) {
+                    const g = groups[key];
+                    const shift = {
+                        day: g.day || '16',
+                        month: g.month || '06',
+                        year: g.year || '2026',
+                        object: g.object || '',
+                        orderNum: g.order,
+                        task: g.task || '',
+                        details: g.details.filter(d => d.exec || d.people || d.time),
+                        signatures: {
+                            recipient: '',
+                            chief: '',
+                            planDept: g.planDept || 'БАХАРЕВА Е.А.',
+                            master: '',
+                            execDateDay: g.day || '16',
+                            execDateMonth: g.month || '06',
+                            ptoDateDay: g.day || '16',
+                            ptoDateMonth: g.month || '06'
+                        }
+                    };
+                    newShifts.push(shift);
+                }
+
+                if (newShifts.length === 0) { alert('Не удалось сформировать наряды.'); return; }
+
+                shifts = newShifts;
+                populateSelect();
+                loadShift(0);
+                closeModal();
+                alert(`Сформировано ${shifts.length} нарядов.`);
+            }
+
+            // ---- PDF для одного наряда (использует текущий DOM) ----
+            function downloadPDF() {
+                saveCurrentShift();
+                const element = document.getElementById('shift-order');
+                element.classList.add('pdf-printing');
+
+                const shift = shifts[currentIndex];
+                const fileName = (shift.orderNum || 'Наряд') + '.pdf';
+
+                const opt = {
+                    margin: 5,
+                    filename: fileName,
+                    image: { type: 'jpeg', quality: 0.95 },
+                    html2canvas: {
+                        scale: 1.5,
+                        useCORS: true,
+                        logging: false,
+                        width: 800,
+                    },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: 'a4',
+                        orientation: 'portrait'
+                    },
+                    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+                };
+
+                html2pdf().set(opt).from(element).save().then(() => {
+                    element.classList.remove('pdf-printing');
+                }).catch((err) => {
+                    console.error(err);
+                    element.classList.remove('pdf-printing');
+                    alert('Ошибка при создании PDF. Попробуйте использовать печать (Ctrl+P).');
+                });
+            }
+
+            // ---- Генерация HTML для PDF (один наряд) ----
+            function buildShiftPDFHTML(shift) {
+                const styles = document.querySelector('style').innerHTML;
+
+                let html = `
+                    <!DOCTYPE html>
+                    <html lang="ru">
+                    <head><meta charset="UTF-8"><style>${styles}</style></head>
+                    <body style="background:#fff; margin:20px;">
+                        <div id="shift-order" style="max-width:100%; padding:20px; box-shadow:none;">
+                            <div class="header">
+                                <h1>СМЕННОЕ ЗАДАНИЕ</h1>
+                                <div class="row"><span>«</span>${shift.day}<span>»</span> ${shift.month} ${shift.year} <span>г.</span></div>
+                                <div class="row"><span>ОБЪЕКТ:</span> ${shift.object}</div>
+                                <div class="row"><span>Заказ №</span> ${shift.orderNum}</div>
+                                <div class="row label-task"><span>Задание:</span> <div style="width:100%; padding:6px 10px; border:1px solid #333; border-radius:4px; min-height:70px;">${shift.task}</div></div>
+                            </div>
+
+                            <table class="details-table">
+                                <thead><tr>
+                                    <th class="col-num">№ п/п</th>
+                                    <th class="col-exec">Исполнитель</th>
+                                    <th class="col-people">Кол-во людей</th>
+                                    <th class="col-time">Время (час)</th>
+                                    <th class="col-done">Выполнено</th>
+                                    <th class="col-note">Примечание</th>
+                                </tr></thead>
+                                <tbody>
+                `;
+                shift.details.forEach((d, i) => {
+                    html += `<tr>
+                                <td class="col-num">${i+1}</td>
+                                <td class="col-exec">${d.exec}</td>
+                                <td class="col-people">${d.people}</td>
+                                <td class="col-time">${d.time}</td>
+                                <td class="col-done">${d.done}</td>
+                                <td class="col-note">${d.note}</td>
+                            </tr>`;
+                });
+                const totalPeople = shift.details.reduce((s, d) => s + parseNumber(d.people), 0);
+                const totalTime = shift.details.reduce((s, d) => s + parseNumber(d.time), 0);
+                html += `
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td></td><td></td>
+                                        <td><strong>Итого людей:</strong> ${totalPeople}</td>
+                                        <td><strong>Итого часов:</strong> ${totalTime}</td>
+                                        <td></td><td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+
+                            <div class="signatures">
+                                <div class="sign-row"><span>Получил: ${shift.signatures.recipient} /__________________/</span></div>
+                                <div class="sign-row"><span>Начальник производства   ${shift.signatures.chief}</span></div>
+                                <div class="sign-row"><span>Плановый отдел   ${shift.signatures.planDept}</span></div>
+                                <div class="sign-row"><span>Сменный мастер  ${shift.signatures.master}</span></div>
+                                <div class="sign-row"><span>Дата выполнения задания "${shift.signatures.execDateDay}" ${shift.signatures.execDateMonth} ${shift.year}г</span></div>
+                                <div class="sign-row"><span>Дата получения ПТО задания "${shift.signatures.ptoDateDay}" ${shift.signatures.ptoDateMonth} ${shift.year}г</span></div>
+                            </div>
+                        </div>
+                    </body>
+                    </html>
+                `;
+                return html;
+            }
+
+            // ===== НОВАЯ ФУНКЦИЯ: Скачать все PDF отдельными файлами с именем как у наряда =====
+            function downloadAllPDFSeparate() {
+                saveCurrentShift();
+                if (shifts.length === 0) {
+                    alert('Нет нарядов для выгрузки.');
+                    return;
+                }
+
+                let index = 0;
+                const total = shifts.length;
+
+                function downloadNext() {
+                    if (index >= total) {
+                        alert('Все PDF-файлы скачаны.');
+                        return;
+                    }
+
+                    const shift = shifts[index];
+                    // Имя файла берём из orderNum, если пусто — используем "Наряд №X"
+                    const fileName = (shift.orderNum || `Наряд №${index+1}`) + '.pdf';
+                    const htmlContent = buildShiftPDFHTML(shift);
+
+                    // Создаём iframe
+                    const iframe = document.createElement('iframe');
+                    iframe.style.position = 'absolute';
+                    iframe.style.left = '-9999px';
+                    iframe.style.top = '-9999px';
+                    iframe.style.width = '800px';
+                    iframe.style.background = '#fff';
+                    document.body.appendChild(iframe);
+
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    iframeDoc.open();
+                    iframeDoc.write(htmlContent);
+                    iframeDoc.close();
+
+                    iframe.onload = function() {
+                        const opt = {
+                            margin: 5,
+                            filename: fileName,
+                            image: { type: 'jpeg', quality: 0.95 },
+                            html2canvas: {
+                                scale: 1.5,
+                                useCORS: true,
+                                logging: false,
+                                width: 800,
+                            },
+                            jsPDF: {
+                                unit: 'mm',
+                                format: 'a4',
+                                orientation: 'portrait'
+                            },
+                            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+                        };
+
+                        html2pdf().set(opt).from(iframeDoc.body).save()
+                            .then(() => {
+                                document.body.removeChild(iframe);
+                                index++;
+                                setTimeout(downloadNext, 700);
+                            })
+                            .catch(err => {
+                                console.error(err);
+                                document.body.removeChild(iframe);
+                                index++;
+                                setTimeout(downloadNext, 700);
+                            });
+                    };
+
+                    // Запасной таймаут
+                    setTimeout(() => {
+                        if (iframe.contentDocument && iframe.contentDocument.body) {
+                            iframe.onload();
+                        } else {
+                            document.body.removeChild(iframe);
+                            index++;
+                            setTimeout(downloadNext, 700);
+                        }
+                    }, 3000);
+                }
+
+                downloadNext();
+            }
+
+            // ---- ЭКСПОРТ ОДНОГО НАРЯДА В EXCEL (A4) ----
+            function downloadExcelFormatted() {
+                saveCurrentShift();
+                const shift = shifts[currentIndex];
+                const blob = buildShiftExcelBlob(shift, 'Наряд');
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `Наряд_${shift.orderNum || 'б/н'}.xls`;
+                link.click();
+                URL.revokeObjectURL(link.href);
+            }
+
+            // ---- ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ СОЗДАНИЯ HTML-КНИГИ С ОДНИМ ЛИСТОМ ----
+            function buildShiftExcelBlob(shift, sheetName) {
+                const html = buildShiftHTML(shift, sheetName);
+                return new Blob([html], { type: 'application/vnd.ms-excel' });
+            }
+
+            function buildShiftHTML(shift, sheetName) {
+                const totalPeople = shift.details.reduce((s, d) => s + parseNumber(d.people), 0);
+                const totalTime = shift.details.reduce((s, d) => s + parseNumber(d.time), 0);
+
+                let html = `
+                    <html xmlns:o="urn:schemas-microsoft-com:office:office" 
+                          xmlns:x="urn:schemas-microsoft-com:office:excel" 
+                          xmlns="http://www.w3.org/TR/REC-html40">
+                    <head>
+                        <meta charset="UTF-8">
+                        <!--[if gte mso 9]>
+                        <xml>
+                          <x:ExcelWorkbook>
+                            <x:ExcelWorksheets>
+                              <x:ExcelWorksheet>
+                                <x:Name>${sheetName}</x:Name>
+                                <x:WorksheetOptions>
+                                  <x:Print>
+                                    <x:FitWidth>1</x:FitWidth>
+                                    <x:FitHeight>1</x:FitHeight>
+                                  </x:Print>
+                                  <x:PageSetup>
+                                    <x:PageMargins>0.5,0.5,0.5,0.5</x:PageMargins>
+                                  </x:PageSetup>
+                                </x:WorksheetOptions>
+                              </x:ExcelWorksheet>
+                            </x:ExcelWorksheets>
+                          </x:ExcelWorkbook>
+                        </xml>
+                        <![endif]-->
+                        <style>
+                            body { font-family: 'Times New Roman', Times, serif; font-size: 14pt; margin: 20px 20px; }
+                            h1 { text-align: center; font-size: 22pt; font-weight: bold; text-transform: uppercase; margin: 6px 0 12px 0; letter-spacing: 2px; }
+                            .header-row { text-align: center; font-size: 15pt; margin: 4px 0; }
+                            .task-row { margin: 6px 0 14px 0; font-size: 15pt; }
+                            table { border-collapse: collapse; width: 100%; margin: 10px 0; table-layout: fixed; }
+                            col.num { width: 5%; }
+                            col.exec { width: 22%; }
+                            col.people { width: 12%; }
+                            col.time { width: 12%; }
+                            col.done { width: 12%; }
+                            col.note { width: 37%; }
+                            th, td { border: 1px solid #000; padding: 6px 8px; text-align: center; vertical-align: middle; font-size: 13pt; }
+                            th { background: #f2f2f2; font-weight: bold; text-transform: uppercase; font-size: 12pt; }
+                            .total-row td { font-weight: bold; background: #f9f9f9; font-size: 13pt; }
+                            .sign-row { margin: 6px 0; font-size: 14pt; }
+                            .sign-row b { font-weight: bold; }
+                            .sign-row .underline { display: inline-block; min-width: 120px; border-bottom: 1px solid #000; padding: 0 4px; }
+                            .spacer { height: 8px; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>СМЕННОЕ ЗАДАНИЕ</h1>
+                        <div class="header-row">«${shift.day}» ${shift.month} ${shift.year} г.</div>
+                        <div class="header-row"><b>ОБЪЕКТ:</b> ${shift.object}</div>
+                        <div class="header-row"><b>Заказ №</b> ${shift.orderNum}</div>
+                        <div class="header-row task-row"><b>Задание:</b> ${shift.task}</div>
+
+                        <table>
+                            <colgroup>
+                                <col class="num">
+                                <col class="exec">
+                                <col class="people">
+                                <col class="time">
+                                <col class="done">
+                                <col class="note">
+                            </colgroup>
+                            <thead>
+                                <tr><th>№</th><th>Исполнитель</th><th>Людей</th><th>Часов</th><th>Выполн.</th><th>Примечание</th></tr>
+                            </thead>
+                            <tbody>
+                `;
+                shift.details.forEach((d, i) => {
+                    html += `<tr><td>${i+1}</td><td>${d.exec}</td><td>${d.people}</td><td>${d.time}</td><td>${d.done}</td><td>${d.note}</td></tr>`;
+                });
+                html += `
+                            <tr class="total-row"><td></td><td></td><td><b>${totalPeople}</b></td><td><b>${totalTime}</b></td><td></td><td></td></tr>
+                        </tbody>
+                    </table>
+                    <div class="spacer"></div>
+                    <div class="sign-row"><b>Получил:</b> ${shift.signatures.recipient} <span class="underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+                    <div class="sign-row"><b>Начальник производства</b> ${shift.signatures.chief}</div>
+                    <div class="sign-row"><b>Плановый отдел</b> ${shift.signatures.planDept}</div>
+                    <div class="sign-row"><b>Сменный мастер</b> ${shift.signatures.master}</div>
+                    <div class="sign-row"><b>Дата выполнения задания</b> "${shift.signatures.execDateDay}" ${shift.signatures.execDateMonth} ${shift.year}г</div>
+                    <div class="sign-row"><b>Дата получения ПТО</b> "${shift.signatures.ptoDateDay}" ${shift.signatures.ptoDateMonth} ${shift.year}г</div>
+                </body>
+                </html>
+                `;
+                return html;
+            }
+
+            // ===== ВСЕ НАРЯДЫ В ОДИН .XLS (С ЛИСТАМИ, ФОРМАТИРОВАНИЕ СОХРАНЕНО) =====
+            function downloadAllShiftsExcel() {
+                saveCurrentShift();
+                if (shifts.length === 0) {
+                    alert('Нет нарядов для выгрузки.');
+                    return;
+                }
+
+                let html = `
+                    <html xmlns:o="urn:schemas-microsoft-com:office:office" 
+                          xmlns:x="urn:schemas-microsoft-com:office:excel" 
+                          xmlns="http://www.w3.org/TR/REC-html40">
+                    <head>
+                        <meta charset="UTF-8">
+                        <!--[if gte mso 9]>
+                        <xml>
+                          <x:ExcelWorkbook>
+                            <x:ExcelWorksheets>
+                `;
+
+                shifts.forEach((shift, idx) => {
+                    const sheetName = (shift.orderNum || `Наряд${idx+1}`).slice(0, 31);
+                    html += `
+                              <x:ExcelWorksheet>
+                                <x:Name>${sheetName}</x:Name>
+                                <x:WorksheetOptions>
+                                  <x:Print>
+                                    <x:FitWidth>1</x:FitWidth>
+                                    <x:FitHeight>1</x:FitHeight>
+                                  </x:Print>
+                                  <x:PageSetup>
+                                    <x:PageMargins>0.5,0.5,0.5,0.5</x:PageMargins>
+                                  </x:PageSetup>
+                                </x:WorksheetOptions>
+                              </x:ExcelWorksheet>
+                    `;
+                });
+
+                html += `
+                              <x:ExcelWorksheet>
+                                <x:Name>Все наряды</x:Name>
+                                <x:WorksheetOptions>
+                                  <x:Print>
+                                    <x:FitWidth>1</x:FitWidth>
+                                    <x:FitHeight>1</x:FitHeight>
+                                  </x:Print>
+                                  <x:PageSetup>
+                                    <x:PageMargins>0.5,0.5,0.5,0.5</x:PageMargins>
+                                  </x:PageSetup>
+                                </x:WorksheetOptions>
+                              </x:ExcelWorksheet>
+                            </x:ExcelWorksheets>
+                          </x:ExcelWorkbook>
+                        </xml>
+                        <![endif]-->
+                        <style>
+                            body { font-family: 'Times New Roman', Times, serif; margin: 20px; }
+                            h1 { text-align: center; font-size: 22pt; font-weight: bold; text-transform: uppercase; margin: 6px 0 12px 0; letter-spacing: 2px; }
+                            .header-row { text-align: center; font-size: 15pt; margin: 4px 0; }
+                            .task-row { margin: 6px 0 14px 0; font-size: 15pt; }
+                            table { border-collapse: collapse; width: 100%; margin: 10px 0; table-layout: fixed; }
+                            col.num { width: 5%; }
+                            col.exec { width: 22%; }
+                            col.people { width: 12%; }
+                            col.time { width: 12%; }
+                            col.done { width: 12%; }
+                            col.note { width: 37%; }
+                            th, td { border: 1px solid #000; padding: 6px 8px; text-align: center; vertical-align: middle; font-size: 13pt; }
+                            th { background: #f2f2f2; font-weight: bold; text-transform: uppercase; font-size: 12pt; }
+                            .total-row td { font-weight: bold; background: #f9f9f9; font-size: 13pt; }
+                            .sign-row { margin: 6px 0; font-size: 14pt; }
+                            .sign-row b { font-weight: bold; }
+                            .sign-row .underline { display: inline-block; min-width: 120px; border-bottom: 1px solid #000; padding: 0 4px; }
+                            .spacer { height: 8px; }
+                            .summary-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                            .summary-table th, .summary-table td { border: 1px solid #000; padding: 4px 6px; text-align: center; font-size: 12pt; }
+                            .summary-table th { background: #d9e1f2; font-weight: bold; }
+                        </style>
+                    </head>
+                    <body>
+                `;
+
+                shifts.forEach((shift, idx) => {
+                    const totalPeople = shift.details.reduce((s, d) => s + parseNumber(d.people), 0);
+                    const totalTime = shift.details.reduce((s, d) => s + parseNumber(d.time), 0);
+
+                    html += `
+                        <div style="page-break-before:always;">
+                            <h1>СМЕННОЕ ЗАДАНИЕ</h1>
+                            <div class="header-row">«${shift.day}» ${shift.month} ${shift.year} г.</div>
+                            <div class="header-row"><b>ОБЪЕКТ:</b> ${shift.object}</div>
+                            <div class="header-row"><b>Заказ №</b> ${shift.orderNum}</div>
+                            <div class="header-row task-row"><b>Задание:</b> ${shift.task}</div>
+
+                            <table>
+                                <colgroup>
+                                    <col class="num"><col class="exec"><col class="people"><col class="time"><col class="done"><col class="note">
+                                </colgroup>
+                                <thead><tr><th>№</th><th>Исполнитель</th><th>Людей</th><th>Часов</th><th>Выполн.</th><th>Примечание</th></tr></thead>
+                                <tbody>
+                    `;
+                    shift.details.forEach((d, i) => {
+                        html += `<tr><td>${i+1}</td><td>${d.exec}</td><td>${d.people}</td><td>${d.time}</td><td>${d.done}</td><td>${d.note}</td></tr>`;
+                    });
+                    html += `
+                                    <tr class="total-row"><td></td><td></td><td><b>${totalPeople}</b></td><td><b>${totalTime}</b></td><td></td><td></td></tr>
+                                </tbody>
+                            </table>
+                            <div class="spacer"></div>
+                            <div class="sign-row"><b>Получил:</b> ${shift.signatures.recipient} <span class="underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+                            <div class="sign-row"><b>Начальник производства</b> ${shift.signatures.chief}</div>
+                            <div class="sign-row"><b>Плановый отдел</b> ${shift.signatures.planDept}</div>
+                            <div class="sign-row"><b>Сменный мастер</b> ${shift.signatures.master}</div>
+                            <div class="sign-row"><b>Дата выполнения задания</b> "${shift.signatures.execDateDay}" ${shift.signatures.execDateMonth} ${shift.year}г</div>
+                            <div class="sign-row"><b>Дата получения ПТО</b> "${shift.signatures.ptoDateDay}" ${shift.signatures.ptoDateMonth} ${shift.year}г</div>
+                        </div>
+                    `;
+                });
+
+                // Сводный лист
+                html += `
+                    <div style="page-break-before:always;">
+                        <h2 style="text-align:center;">Сводка всех нарядов</h2>
+                        <table class="summary-table">
+                            <thead><tr><th>№</th><th>Заказ</th><th>Объект</th><th>Дата</th><th>Задание</th><th>Всего людей</th><th>Всего часов</th></tr></thead>
+                            <tbody>
+                `;
+                shifts.forEach((shift, idx) => {
+                    const totalPeople = shift.details.reduce((s, d) => s + parseNumber(d.people), 0);
+                    const totalTime = shift.details.reduce((s, d) => s + parseNumber(d.time), 0);
+                    html += `
+                                <tr>
+                                    <td>${idx+1}</td>
+                                    <td>${shift.orderNum}</td>
+                                    <td>${shift.object}</td>
+                                    <td>${shift.day}.${shift.month}.${shift.year}</td>
+                                    <td style="text-align:left;">${shift.task}</td>
+                                    <td>${totalPeople}</td>
+                                    <td>${totalTime}</td>
+                                </tr>
+                    `;
+                });
+                html += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                html += `</body></html>`;
+
+                const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `Все_наряды.xls`;
+                link.click();
+                URL.revokeObjectURL(link.href);
+            }
+
+            // ---- Экспорт в глобальную область ----
+            window.addRow = function(data) { addRow(data || {}); };
+            window.addNewShift = addNewShift;
+            window.deleteCurrentShift = deleteCurrentShift;
+            window.downloadPDF = downloadPDF;
+            window.downloadAllPDFSeparate = downloadAllPDFSeparate;
+            window.downloadExcelFormatted = downloadExcelFormatted;
+            window.downloadAllShiftsExcel = downloadAllShiftsExcel;
+            window.openModal = openModal;
+            window.closeModal = closeModal;
+            window.addSourceRow = addSourceRow;
+            window.clearSourceTable = clearSourceTable;
+            window.generateShiftsFromSource = generateShiftsFromSource;
+            window.processPaste = processPaste;
+
+            // ---- Инициализация ----
+            initDefaultShift();
+
+            document.querySelectorAll('input, textarea').forEach(el => {
+                el.addEventListener('change', saveCurrentShift);
+                el.addEventListener('input', function(e) {
+                    if (!e.target.classList.contains('people-input') && !e.target.classList.contains('time-input'))
+                        saveCurrentShift();
+                });
+            });
+
+            modalOverlay.addEventListener('click', function(e) {
+                if (e.target === modalOverlay) closeModal();
+            });
+
+        })();
+    </script>
+</body>
+</html>
